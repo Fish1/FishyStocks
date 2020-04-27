@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 	"io"
+	"io/ioutil"
 	"fmt"
 	"time"
 	"encoding/json"
@@ -11,8 +12,23 @@ import (
 	"github.com/alpacahq/alpaca-trade-api-go/common"
 )
 
+type Key struct {
+	public string
+	secret string
+}
+
 func init() {
-	fmt.Println("Welcome to Fish Trades")
+	fmt.Println("Welcome to Fish Stock") 
+	content, err := ioutil.ReadFile("key.json")
+	if err != nil {
+		panic(err)
+	}
+	contentstring := string(content)
+	fmt.Println(contentstring)
+	var key Key 
+	json.Unmarshal([]byte(contentstring), &key)
+	fmt.Println(key.public)
+
 	os.Setenv(common.EnvApiKeyID, "PKYGSNOJNIUALA36NT5O")
 	os.Setenv(common.EnvApiSecretKey, "25LPyrS8Q9pfuGaaamb9iaZ4Vul9q2YCTedRP8gY")
 	alpaca.SetBaseUrl("https://paper-api.alpaca.markets")
