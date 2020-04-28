@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"fmt"
 	"time"
+	"math/rand"
 	"encoding/json"
 	"net/http"
 	"github.com/alpacahq/alpaca-trade-api-go/alpaca"
@@ -13,24 +14,30 @@ import (
 )
 
 type Key struct {
-	public string
-	secret string
+	Public string `json:"public"`
+	Secret string `json:"secret"`
 }
+
+var source = rand.NewSource(time.Now().UnixNano())
+var random = rand.New(source)
 
 func init() {
 	fmt.Println("Welcome to Fish Stock") 
-	content, err := ioutil.ReadFile("key.json")
+
+	var key Key
+	file, err := os.Open("key.json")
 	if err != nil {
 		panic(err)
 	}
-	contentstring := string(content)
-	fmt.Println(contentstring)
-	var key Key 
-	json.Unmarshal([]byte(contentstring), &key)
-	fmt.Println(key.public)
+	bytes, err := ioutil.ReadAll(file)
+	if err != nil {
+		panic(err)
+	}
+	json.Unmarshal(bytes, &key)
+	file.Close()
 
-	os.Setenv(common.EnvApiKeyID, "PKYGSNOJNIUALA36NT5O")
-	os.Setenv(common.EnvApiSecretKey, "25LPyrS8Q9pfuGaaamb9iaZ4Vul9q2YCTedRP8gY")
+	os.Setenv(common.EnvApiKeyID, key.Public)
+	os.Setenv(common.EnvApiSecretKey, key.Secret)
 	alpaca.SetBaseUrl("https://paper-api.alpaca.markets")
 }
 
@@ -86,7 +93,7 @@ func quote(ticker string, client *alpaca.Client) {
 		if err != nil {
 			panic(err)
 		}
-		time.Sleep(1 * time.Minute)
+		time.Sleep(30 * time.Second)
 	}
 }
 
