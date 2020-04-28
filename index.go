@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"fmt"
 	"time"
-	"math/rand"
 	"encoding/json"
 	"net/http"
 	"github.com/alpacahq/alpaca-trade-api-go/alpaca"
@@ -17,9 +16,6 @@ type Key struct {
 	Public string `json:"public"`
 	Secret string `json:"secret"`
 }
-
-var source = rand.NewSource(time.Now().UnixNano())
-var random = rand.New(source)
 
 func init() {
 	fmt.Println("Welcome to Fish Stock") 
