@@ -1,5 +1,5 @@
 install:
-	go build -o bin/fishstock
+	go build -o bin/fishystocks
 
 run: install
-	./bin/fishstock
+	./bin/fishystocks

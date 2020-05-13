@@ -2,16 +2,36 @@
 <html>
 <head>
 	<title>
-		Fish Stocks
+		FishyStocks
 	</title>
+	<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
 </head>
 <body>
 	<h1>
-		Fish Stocks
+		FishyStocks
 	</h1>
 
-	<p>
-		Welcome to the Fish Stocks Website!!!!
-	</p>
+	<div>
+		<h2>
+			Apple
+		</h2>
+		<h3>
+			Current Price
+		</h3>
+		<div id="aapl">
+			<div id="aapl_t">
+			</div>
+			<div id="aapl_c">
+			</div>
+			<div id="aapl_v">
+			</div>
+		</div>
+		<canvas id="appl_chart" width="500" height="400">
+		</canvas>
+	</div>
+
+	<script src="chart.js"></script>
+	<script src="main.js"></script>
 </body>
 </html>

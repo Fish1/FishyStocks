@@ -8,6 +8,7 @@ import (
 	"time"
 	"encoding/json"
 	"net/http"
+	"math/rand"
 	"github.com/alpacahq/alpaca-trade-api-go/alpaca"
 	"github.com/alpacahq/alpaca-trade-api-go/common"
 )
@@ -17,9 +18,16 @@ type Key struct {
 	Secret string `json:"secret"`
 }
 
-func init() {
-	fmt.Println("Welcome to Fish Stock") 
+type WatchList struct {
+	Stocks [] string `json:"stocks"`
+}
 
+var watchList WatchList 
+
+func init() {
+	fmt.Println("Welcome to Fishy Stocks") 
+
+	/* Read keys from file */
 	var key Key
 	file, err := os.Open("key.json")
 	if err != nil {
@@ -31,10 +39,22 @@ func init() {
 	}
 	json.Unmarshal(bytes, &key)
 	file.Close()
-
+	
 	os.Setenv(common.EnvApiKeyID, key.Public)
 	os.Setenv(common.EnvApiSecretKey, key.Secret)
 	alpaca.SetBaseUrl("https://paper-api.alpaca.markets")
+
+	/* Read stocks from file */
+	file, err = os.Open("stocks.json")
+	if err != nil {
+		panic(err)
+	}
+	bytes, err = ioutil.ReadAll(file)
+	if err != nil {
+		panic(err)
+	}
+	json.Unmarshal(bytes, &watchList)
+	file.Close()
 }
 
 func runWebsite() {
@@ -60,42 +80,47 @@ func getClient() *alpaca.Client {
 
 func quote(ticker string, client *alpaca.Client) {
 	for {
-		/* Get Stock Data */
-		barCount := 5
+		/* Get latest minute of data */
+		barCount := 1
 		bars, err := client.GetSymbolBars(ticker, alpaca.ListBarParams {
-			Timeframe: "day",
+			Timeframe: "minute",
 			Limit: &barCount,
 		})
 		if err != nil {
 			panic(err)
 		}
 
-		/* Create File */
-		file, err := os.Create("static/stocks/" + ticker + ".json")
-		if err != nil {
-			panic(err)
-		}
-		defer file.Close()
-
-		// Convert the bars to JSON
+		/* Convert the bars to JSON */
 		data, err := json.Marshal(bars)
 		if err != nil {
 			panic(err)
 		}
 		datastring := string(data)
 
+		/* Create File */
+		file, err := os.Create("static/stocks/" + ticker + ".json")
+		if err != nil {
+			panic(err)
+		}
+
 		/* Write data to file */
 		_, err = io.WriteString(file, datastring)
 		if err != nil {
 			panic(err)
 		}
-		time.Sleep(30 * time.Second)
+
+		/* Close the file and wait */
+		file.Close()
+		t := rand.Intn(10) + 2
+		fmt.Println(ticker + " " + datastring)
+		time.Sleep(time.Duration(t) * time.Second)
 	}
 }
 
 func main() {
 	client := getClient()
-	go quote("AAPL", client)
-	go quote("GOOG", client)
+	for _, ticker := range watchList.Stocks {
+		go quote(ticker, client)
+	}
 	runWebsite()
 }
